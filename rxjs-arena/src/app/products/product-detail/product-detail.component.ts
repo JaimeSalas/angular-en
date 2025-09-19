@@ -1,6 +1,15 @@
 import { CurrencyPipe, NgFor, NgIf } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import {
+  Component,
+  inject,
+  Input,
+  OnChanges,
+  OnDestroy,
+  SimpleChanges,
+} from '@angular/core';
 import { Product } from '../product';
+import { catchError, EMPTY, Subscription } from 'rxjs';
+import { ProductService } from '../product.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -9,17 +18,42 @@ import { Product } from '../product';
   templateUrl: './product-detail.component.html',
   styles: ``,
 })
-export class ProductDetailComponent {
+export class ProductDetailComponent implements OnChanges, OnDestroy {
   // Just enough here for the template to compile
   @Input() productId: number = 0;
   errorMessage = '';
+  sub!: Subscription;
+
+  private productService = inject(ProductService);
 
   // Product to display
   product: Product | null = null;
 
   // Set the page title
-  pageTitle = this.product ? `Product Detail for: ${this.product.productName}` : 'Product Detail';
+  pageTitle = this.product
+    ? `Product Detail for: ${this.product.productName}`
+    : 'Product Detail';
 
-  addToCart(product: Product) {
+  ngOnChanges(changes: SimpleChanges): void {
+    // key value of
+    const id = changes['productId'].currentValue;
+
+    if (id > 0) {
+      this.sub = this.productService
+        .getProduct(id)
+        .pipe(
+          catchError((err) => {
+            this.errorMessage = err;
+            return EMPTY;
+          })
+        )
+        .subscribe((product) => (this.product = product));
+    }
+  }
+
+  addToCart(product: Product) {}
+
+  ngOnDestroy(): void {
+    this.sub.unsubscribe();
   }
 }
