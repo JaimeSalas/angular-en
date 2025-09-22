@@ -1,3 +1,5 @@
+@let products = products$ | async;
+
 <div class="row">
   <div class="col-md-4">
     <div class="card">
@@ -5,23 +7,32 @@
         {{ pageTitle }}
       </div>
 
-      <div class="card-body" *ngIf="products.length">
-        <div class="list-group">
-          <button
-            type="button"
-            class="list-group-item"
-            *ngFor="let product of products"
-            [ngClass]="{ active: product.id === selectedProductId }"
-            (click)="onSelected(product.id)"
-          >
-            {{ product.productName }}
-          </button>
+
+      @if (products) {
+        <div class="card-body">
+          <div class="list-group">
+            @for(product of products; track product.id) {
+            <button
+              type="button"
+              class="list-group-item"
+              [ngClass]="{ active: product.id === selectedProductId }"
+              (click)="onSelected(product.id)"
+            >
+              {{ product.productName }}
+            </button>
+            }
+          </div>
         </div>
+      }
+
+    </div>
+
+    @if(errorMessage !== '') {
+      <div class="alert alert-danger">
+        {{ errorMessage }}
       </div>
-    </div>
-    <div class="alert alert-danger" *ngIf="errorMessage">
-      {{ errorMessage }}
-    </div>
+    }
+
   </div>
 
   <div class="col-md-8">
