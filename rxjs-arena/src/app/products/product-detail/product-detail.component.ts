@@ -3,6 +3,7 @@ import { Component, inject } from '@angular/core';
 import { Product } from '../product';
 import { catchError, EMPTY } from 'rxjs';
 import { ProductService } from '../product.service';
+import { CartService } from '../../cart/cart.service';
 
 @Component({
   selector: 'app-product-detail',
@@ -15,6 +16,8 @@ export class ProductDetailComponent {
   errorMessage = '';
 
   private productService = inject(ProductService);
+  private cartService = inject(CartService);
+
   product$ = this.productService.product$.pipe(
     catchError((err) => {
       this.errorMessage = err;
@@ -25,5 +28,7 @@ export class ProductDetailComponent {
   // Set the page title
   pageTitle = 'Product detail';
 
-  addToCart(product: Product) {}
+  addToCart(product: Product) {
+    this.cartService.addToCart(product);
+  }
 }

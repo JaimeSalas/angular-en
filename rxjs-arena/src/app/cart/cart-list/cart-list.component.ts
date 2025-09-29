@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject  } from '@angular/core';
 import { CartItemComponent } from '../cart-item/cart-item.component';
 import { NgFor, NgIf } from '@angular/common';
-import { CartItem } from '../cart';
+import { CartService } from '../cart.service';
 
 @Component({
   selector: 'app-cart-list',
@@ -11,8 +11,12 @@ import { CartItem } from '../cart';
   styles: ``,
 })
 export class CartListComponent {
-  // Just enough here for the template to compile
   pageTitle = 'Cart';
+  private cartService = inject(CartService);
+  cartItems = this.cartService.cartItems;
 
-  cartItems: CartItem[] = [];
+  // constructor() {
+  //   const t = this.cartItems();
+  //   console.log(t);
+  // }
 }
