@@ -17,7 +17,7 @@ import { Product, Result } from './product';
 import { HttpErrorService } from '../utilities/http-error.service';
 import { ReviewService } from '../reviews/review.service';
 import { Review } from '../reviews/review';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable({
   providedIn: 'root',
@@ -52,39 +52,18 @@ export class ProductService {
   });
 
   products = computed(() => this.productsResult().data);
-
   productsError = computed(() => this.productsResult().error);
-  // products = computed(() => {
-  //   try {
-  //     return toSignal(this.products$, { initialValue: [] as Product[] });
-  //   } catch (error) {
-  //     return [] as Product[];
-  //   }
-  // });
-
-  // product$.subscribe()
-  readonly product$ = this.productSelected$.pipe(
-    tap((p) => p),
-    filter(Boolean), // !!p - null, undefined, 0, '', false, 'false'
+  
+  readonly product$ = toObservable(this.selectedProductId).pipe(
+    filter(Boolean),
     switchMap((id) => {
       const productUrl = `${this.productsUrl}/${id}`;
       return this.http.get<Product>(productUrl).pipe(
-        tap(() => console.log('In http.get byid pipe')),
         switchMap((p) => this.getProductsWithReviews(p)),
         catchError((err) => this.handleError(err))
       );
     })
-  ); // -> product ID --- number
-
-  // product$ = combineLatest([this.productSelected$, this.products$]).pipe(
-  //   tap((x) => x),
-  //   map(([selectedProductId, products]) =>
-  //     products.find((p) => p.id === selectedProductId)
-  //   ),
-  //   filter(Boolean),
-  //   switchMap((p) => this.getProductsWithReviews(p)),
-  //   catchError((err) => this.handleError(err))
-  // );
+  );
 
   getProductsWithReviews(product: Product): Observable<Product> {
     if (product.hasReviews) {
@@ -96,7 +75,6 @@ export class ProductService {
   }
 
   productSelected(selectedProductId: number): void {
-    this.productSelectedSubject.next(selectedProductId);
     this.selectedProductId.set(selectedProductId);
   }
 
