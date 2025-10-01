@@ -11,7 +11,7 @@ import { BooksActions, BooksApiActions } from './satate/books.actions';
   standalone: false,
   styleUrl: './app.css',
 })
-export class App implements OnInit, OnDestroy {
+export class App implements OnInit, OnDestroy { // suffix - component
   private booksService = inject(BooksService);
   private store = inject(Store);
   private sub!: Subscription;
